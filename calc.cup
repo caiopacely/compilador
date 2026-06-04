@@ -1,0 +1,123 @@
+import java_cup.runtime.*;
+import java.io.*;
+import java.util.function.Supplier;
+import java.util.Map;       
+import java.util.HashMap;   
+
+parser code {:
+    scanner s;
+    parser(scanner s){ this.s=s; }
+    public Map<String, Integer> variaveis = new HashMap<>();
+:}
+
+scan with {: return s.next_token(); :};
+
+terminal SEMI, PLUS, MINUS, TIMES, DIV, EQUAL, NOTEQUAL, BIGGER, MINER, UMINUS, LPAREN, PRINT, RPAREN;
+terminal IF, ELSE, WHILE, RETURN;
+terminal ASSIGN; 
+terminal String ID;  
+terminal Integer NUMBER;
+
+non terminal                  expr_list;
+non terminal Supplier<Integer> expr; 
+non terminal Runnable          stmt; 
+
+precedence right ASSIGN;
+precedence right ELSE; 
+precedence left PLUS, MINUS;
+precedence left TIMES, DIV, EQUAL, NOTEQUAL, BIGGER, MINER;
+precedence left UMINUS;
+
+// --- REGRAS GRAMATICAIS ---
+
+expr_list ::= expr_list stmt:s {: s.run(); :}
+            | stmt:s           {: s.run(); :}
+            ;
+
+stmt ::= 
+      IF LPAREN expr:cond RPAREN stmt:s1
+      {: 
+         RESULT = () -> {
+             if (cond.get() == 1) {
+                 s1.run();
+             }
+         };
+      :}
+      
+    | IF LPAREN expr:cond RPAREN stmt:s1 ELSE stmt:s2
+      {: 
+         RESULT = () -> {
+             if (cond.get() == 1) {
+                 s1.run();
+             } else {
+                 s2.run();
+             }
+         };
+      :}
+      
+    | PRINT expr:e SEMI
+      {:
+         RESULT = () -> {
+             System.out.println(e.get());
+         };
+      :}
+
+    | WHILE LPAREN expr:cond RPAREN stmt:s1
+      {: 
+         RESULT = () -> {
+             while (cond.get() == 1) {
+                 s1.run();
+             }
+         };
+      :}
+
+    | RETURN expr:e SEMI
+      {:
+         RESULT = () -> {
+             System.out.println("RETORNO: " + e.get());
+         };
+      :}
+      
+    | expr:e SEMI 
+      {: 
+         RESULT = () -> {
+             System.out.println("Resultado: " + e.get());
+         };
+      :}
+
+    | ID:nome ASSIGN expr:e SEMI
+      {: 
+         RESULT = () -> {
+             int valor = e.get(); 
+             parser.variaveis.put(nome, valor); 
+             System.out.println("Variavel '" + nome + "' guardada com o valor: " + valor);
+         };
+      :}
+    ; // <--- O ponto-e-vírgula agora fecha CORRETAMENTE todo o bloco de comandos!
+               
+// --- REGRAS DE EXPRESSÃO (Tudo que retorna valor fica aqui) ---
+expr      ::= expr:e1 PLUS  expr:e2         {: RESULT = () -> e1.get() + e2.get(); :}
+             | expr:e1 MINUS expr:e2        {: RESULT = () -> e1.get() - e2.get(); :}
+             | expr:e1 TIMES expr:e2        {: RESULT = () -> e1.get() * e2.get(); :}
+             | expr:e1 DIV expr:e2          {: RESULT = () -> e1.get() / e2.get(); :}
+             | expr:e1 BIGGER expr:e2       {: RESULT = () -> (e1.get() > e2.get()) ? 1 : 0; :}
+             | expr:e1 MINER expr:e2        {: RESULT = () -> (e1.get() < e2.get()) ? 1 : 0; :}
+             | expr:e1 EQUAL expr:e2        {: RESULT = () -> e1.get().equals(e2.get()) ? 1 : 0; :}
+             | expr:e1 NOTEQUAL expr:e2     {: RESULT = () -> e1.get().equals(e2.get()) ? 0 : 1; :}
+             | MINUS expr:e                 {: RESULT = () -> -e.get(); :} %prec UMINUS
+             | LPAREN expr:e RPAREN         {: RESULT = () -> e.get(); :}
+             | NUMBER:n                     {: RESULT = () -> n; :}
+             
+             // --- LEITURA DE VARIÁVEIS ---
+             | ID:nome
+               {: 
+                  RESULT = () -> {
+                      if (parser.variaveis.containsKey(nome)) {
+                          return parser.variaveis.get(nome);
+                      } else {
+                          System.err.println("Erro: Variavel '" + nome + "' nao foi declarada!");
+                          return 0; 
+                      }
+                  };
+               :}
+             ;
