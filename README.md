@@ -8,7 +8,7 @@ Este projeto consiste num **Interpretador Interativo** para uma linguagem de pro
 
 ---
 
-## 🚀 Funcionalidades Suportadas
+## Funcionalidades Suportadas
 
 * **Operações Aritméticas:** Adição (`+`), Subtração (`-`), Multiplicação (`*`) e Divisão (`/`).
 * **Operações Relacionais:** Comparadores maior (`>`), menor (`<`), igual (`==`) e diferente (`!=`).
@@ -18,7 +18,7 @@ Este projeto consiste num **Interpretador Interativo** para uma linguagem de pro
 
 ---
 
-## 🏗️ Arquitetura e Fluxo do Compilador
+## Arquitetura e Fluxo do Compilador
 
 O fluxo de processamento do interpretador segue a arquitetura clássica do Front-End de um compilador:
 
@@ -51,7 +51,7 @@ precedence left TIMES, DIV, EQUAL, NOTEQUAL, BIGGER, MINER;
 precedence left UMINUS;
 
 ```
-### 🪟 Como rodar no Windows
+### Como rodar no Windows
 Abra o terminal (PowerShell ou CMD) na raiz do projeto e execute:
 
 Limpar arquivos antigos de cache (Recomendado):
@@ -79,4 +79,4 @@ Compilar e rodar o interpretador:
 
 Bash
 ./run.sh
-```
+
