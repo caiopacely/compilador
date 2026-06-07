@@ -1,0 +1,27 @@
+energia seja 10;
+foco seja 5;
+
+manifeste energia;
+manifeste foco;
+
+resultado seja energia + foco * 2;
+manifeste resultado;
+
+se_acreditar (resultado > 15)
+{
+    manifeste resultado;
+}
+se_desistir
+{
+    manifeste 0;
+}
+
+contador seja 1;
+
+enquanto_nao_conquistar (contador <= 5)
+{
+    manifeste contador;
+    contador seja contador + 1;
+}
+
+prospere resultado;
