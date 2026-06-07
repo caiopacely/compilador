@@ -20,12 +20,37 @@ public class Main {
                 if (input.isEmpty()) continue;
 
                 int braceCount = countChar(input, '{') - countChar(input, '}');
-                while (braceCount > 0) {
+
+                while (braceCount > 0 || !isComplete(input)) {
                     System.out.print("  ");
                     String nextLine = reader.readLine();
                     if (nextLine == null) break;
                     input += " " + nextLine.trim();
                     braceCount += countChar(nextLine, '{') - countChar(nextLine, '}');
+                }
+
+                // If we parsed an if-statement ending with }, check if else follows
+                while (input.contains("se_acreditar")
+                       && !input.contains("se_desistir")
+                       && braceCount == 0
+                       && isComplete(input)) {
+                    reader.mark(512);
+                    String nextLine = reader.readLine();
+                    if (nextLine != null && nextLine.trim().startsWith("se_desistir")) {
+                        System.out.print("  ");
+                        input += " " + nextLine.trim();
+                        braceCount += countChar(nextLine, '{') - countChar(nextLine, '}');
+                        while (braceCount > 0 || !isComplete(input)) {
+                            System.out.print("  ");
+                            nextLine = reader.readLine();
+                            if (nextLine == null) break;
+                            input += " " + nextLine.trim();
+                            braceCount += countChar(nextLine, '{') - countChar(nextLine, '}');
+                        }
+                    } else {
+                        reader.reset();
+                        break;
+                    }
                 }
 
                 scanner.yyreset(new StringReader(input));
@@ -34,6 +59,11 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static boolean isComplete(String s) {
+        String t = s.trim();
+        return t.endsWith(";") || t.endsWith("}");
     }
 
     private static int countChar(String s, char c) {
